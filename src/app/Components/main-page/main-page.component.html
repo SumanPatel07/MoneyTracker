@@ -1,0 +1,61 @@
+<!-- Top Bar -->
+<div class="top-bar">
+  <h1>Budget Calculator</h1>
+</div>
+
+<!-- Add Item Section -->
+<div class="add-item-section">
+  <div class="add-item-container">
+    <app-add-item-form (formSubmit)="addItem($event)"></app-add-item-form>
+  </div>
+</div>
+
+<!-- Grouped Budget Items Table -->
+<div class="grouped-budget-items">
+  <div *ngFor="let date of getGroupedKeys()">
+    <h2>{{ date }}</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Details</th>
+          <th>Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of getGroupedItemsByDate()[date]; let i = index">
+          <!-- Show Edit Row if editIndex matches -->
+          <ng-container *ngIf="editIndex !== budgetItems.indexOf(item); else editRow">
+            <td>{{ item.name }}</td>
+            <td>{{ item.amount }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.details || '-' }}</td>
+            <td>{{ item.timestamp | date: 'shortTime' }}</td>
+            <td>
+              <button class="edit-btn" (click)="startEdit(item)">Edit</button>
+              <button class="delete-btn" (click)="deleteItem(item)">Delete</button>
+            </td>
+          </ng-container>
+
+          <!-- Editable Row Template -->
+          <ng-template #editRow>
+            <td><input [(ngModel)]="editedItem.name" /></td>
+            <td><input type="number" [(ngModel)]="editedItem.amount" /></td>
+            <td><input [(ngModel)]="editedItem.category" /></td>
+            <td><input [(ngModel)]="editedItem.details" /></td>
+            <td><input type="datetime-local" [(ngModel)]="editedItem.timestamp" /></td>
+            <td>
+              <button class="save-btn" (click)="updateItem()">Save</button>
+              <button class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+            </td>
+          </ng-template>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

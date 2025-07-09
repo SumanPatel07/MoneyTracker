@@ -1,0 +1,36 @@
+<form (submit)="onSubmit()">
+    <h1 class="text-header">New Expense</h1>
+  
+    <!-- Name -->
+    <input type="text" placeholder="Name" [(ngModel)]="name" name="name" required />
+  
+    <!-- Amount -->
+    <input type="number" placeholder="Amount" [(ngModel)]="amount" name="amount" required min="0" />
+  
+    <!-- Category Section -->
+    <div *ngIf="!showNewCategoryInput">
+      <!-- Search Box -->
+      <input type="text" placeholder="Search category..." [(ngModel)]="categorySearch" name="categorySearch" />
+  
+      <!-- Dropdown -->
+      <select [(ngModel)]="category" name="category" required>
+        <option *ngFor="let c of filteredCategories" [value]="c">{{ c }}</option>
+        <option value="__add_new__">➕ Add New Category</option>
+      </select>
+    </div>
+  
+    <!-- Add New Category Form -->
+    <div *ngIf="category === '__add_new__' || showNewCategoryInput">
+      <input type="text" placeholder="New Category Name" [(ngModel)]="newCategoryName" name="newCategoryName" />
+      <button type="button" (click)="saveNewCategory()">Save Category</button>
+    </div>
+  
+    <!-- Details -->
+    <textarea placeholder="Details (optional)" [(ngModel)]="details" name="details" rows="3"></textarea>
+  
+    <!-- Date & Time -->
+    <input type="datetime-local" [(ngModel)]="timestamp" name="timestamp" />
+  
+    <button type="submit">Add</button>
+  </form>
+  
