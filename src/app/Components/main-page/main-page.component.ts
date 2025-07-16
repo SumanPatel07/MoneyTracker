@@ -12,18 +12,32 @@ export class MainPageComponent implements OnInit {
   totalBudget: number = 0;
   editIndex: number | null = null;
   editedItem: BudgetItem = new BudgetItem('',0,'','','');
+  totalIncome: number = 0;
+  formType: 'income' | 'expense' = 'expense';
 
   ngOnInit(): void {
     const saved = localStorage.getItem('budgetItems');
     if (saved) {
       this.budgetItems = JSON.parse(saved);
-      this.totalBudget = this.budgetItems.reduce((sum, item) => sum + item.amount, 0);
+      this.totalBudget = this.budgetItems.filter(i => i.type === 'expense').reduce((sum, i) => sum + i.amount, 0);
+      this.totalIncome = this.budgetItems.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0);
     }
   }
 
   addItem(newItem: BudgetItem){
     this.budgetItems.push(newItem);
-    this.totalBudget += newItem.amount;
+
+    if (newItem.type === 'income') {
+      this.totalIncome += newItem.amount;
+    } else {
+      this.totalBudget += newItem.amount;
+    }
+
+    this.budgetItems.sort((a, b) => {
+      const dateA = new Date(a.timestamp || '');
+      const dateB = new Date(b.timestamp || '');
+      return dateB.getTime() - dateA.getTime();
+    });
     localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
   }
 
@@ -31,7 +45,13 @@ export class MainPageComponent implements OnInit {
     const index = this.budgetItems.indexOf(item);
     if (index > -1) {
       this.budgetItems.splice(index, 1);
-      this.totalBudget -= item.amount;
+
+      if (item.type === 'income') {
+        this.totalIncome -= item.amount;
+      } else {
+       this.totalBudget -= item.amount;
+      }
+
       localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
     }
   }
@@ -64,7 +84,25 @@ export class MainPageComponent implements OnInit {
   }
 
   getGroupedKeys(): string[] {
-    return Object.keys(this.getGroupedItemsByDate());
+    const keys = Object.keys(this.getGroupedItemsByDate());
+      
+      return keys.sort((a, b) => {
+      const dateA = this.convertToDate(a);
+      const dateB = this.convertToDate(b);
+      return dateB.getTime() - dateA.getTime();
+    });
+  }
+
+  convertToDate(label: string): Date {
+    const today = new Date();
+    if (label === 'Today') return today;
+
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    if (label === 'Yesterday') return yesterday;
+
+    // fallback: parse actual date
+    return new Date(label);
   }
 
   startEdit(item: BudgetItem) {
@@ -78,11 +116,36 @@ export class MainPageComponent implements OnInit {
   }
 
   updateItem() {
-    if(this.editedItem.name.trim() && this.editedItem.amount > 0 && this.editedItem.category) {
-      this.budgetItems[this.editIndex!] = {...this.editedItem};
-      this.totalBudget = this.budgetItems.reduce((sum, item) => sum + item.amount, 0);
-      localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
-      this.cancelEdit();
+    if(this.editedItem.name.trim() && this.editedItem.amount > 0 && this.editedItem.category) 
+      {
+        const currentItem = this.budgetItems[this.editIndex!];
+
+        if(currentItem.type === 'income')
+        {
+          this.totalIncome -= currentItem.amount;
+        }
+        else {
+          this.totalBudget -= currentItem.amount;
+        }
+
+        this.budgetItems[this.editIndex!] = {...this.editedItem};
+
+        if (this.editedItem.type === 'income') {
+          this.totalIncome += this.editedItem.amount;
+        } else {
+          this.totalBudget += this.editedItem.amount;
+        }
+
+        localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
+
+        this.cancelEdit();
     }
+  }
+  
+  getDayTotal(dateLabel: string, type: 'income' | 'expense'): number {
+    const items = this.getGroupedItemsByDate()[dateLabel] || [];
+    return items
+      .filter(i => i.type === type)
+      .reduce((sum, i) => sum + i.amount, 0);
   }
 }

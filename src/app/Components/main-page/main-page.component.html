@@ -3,10 +3,24 @@
   <h1>Budget Calculator</h1>
 </div>
 
+<div class="toggle-buttons">
+  <button [class.active]="formType === 'expense'" (click)="formType = 'expense'">Add Expense</button>
+  <button [class.active]="formType === 'income'" (click)="formType = 'income'">Add income</button>
+</div>
+
+<div class="monthly-summary">
+  <h3>Total Income: ₹{{ totalIncome }}</h3>
+  <h3>Total Expense: ₹{{ totalBudget }}</h3>
+  <h2>Remaining Balance: ₹{{ totalIncome - totalBudget }}</h2>
+</div>
+
 <!-- Add Item Section -->
 <div class="add-item-section">
   <div class="add-item-container">
-    <app-add-item-form (formSubmit)="addItem($event)"></app-add-item-form>
+    <app-add-item-form
+      [type]="formType"
+      (formSubmit)="addItem($event)">
+    </app-add-item-form>
   </div>
 </div>
 
@@ -23,19 +37,22 @@
           <th>Category</th>
           <th>Details</th>
           <th>Time</th>
+          <th>Type</th> <!-- New header -->
           <th>Actions</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let item of getGroupedItemsByDate()[date]; let i = index">
-          <!-- Show Edit Row if editIndex matches -->
+          
+          <!-- Show Regular Row -->
           <ng-container *ngIf="editIndex !== budgetItems.indexOf(item); else editRow">
             <td>{{ item.name }}</td>
             <td>{{ item.amount }}</td>
             <td>{{ item.category }}</td>
             <td>{{ item.details || '-' }}</td>
             <td>{{ item.timestamp | date: 'shortTime' }}</td>
+            <td>{{ item.type }}</td> <!-- New column -->
             <td>
               <button class="edit-btn" (click)="startEdit(item)">Edit</button>
               <button class="delete-btn" (click)="deleteItem(item)">Delete</button>
@@ -50,11 +67,26 @@
             <td><input [(ngModel)]="editedItem.details" /></td>
             <td><input type="datetime-local" [(ngModel)]="editedItem.timestamp" /></td>
             <td>
+              <!-- Type Dropdown -->
+              <select [(ngModel)]="editedItem.type">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+            </td>
+            <td>
               <button class="save-btn" (click)="updateItem()">Save</button>
               <button class="cancel-btn" (click)="cancelEdit()">Cancel</button>
             </td>
           </ng-template>
         </tr>
+        <!-- 🟢 Daily Totals Row -->
+      <tr class="daily-total-row">
+        <td colspan="7">
+          <span class="label">Total Income : </span>
+          <span class="daily-income-amount">₹{{ getDayTotal(date, 'income') }}</span> |
+          <span class="label">Total Expense : </span>
+          <span class="daily-expense-amount">₹{{ getDayTotal(date, 'expense') }}</span>
+        </td>
       </tbody>
     </table>
   </div>

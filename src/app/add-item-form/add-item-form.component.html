@@ -1,5 +1,5 @@
 <form (submit)="onSubmit()">
-    <h1 class="text-header">New Expense</h1>
+    <h1 class="text-header">New {{ type | titlecase }}</h1>
   
     <!-- Name -->
     <input type="text" placeholder="Name" [(ngModel)]="name" name="name" required />

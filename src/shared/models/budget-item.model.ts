@@ -4,6 +4,7 @@ export class BudgetItem {
         public amount: number,
         public category: string,
         public details: string,
-        public timestamp?: string
+        public timestamp?: string,
+        public type: 'income' | 'expense' = 'expense'
     ) {}
 }

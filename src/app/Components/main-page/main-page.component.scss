@@ -137,4 +137,70 @@
         box-sizing: border-box;
       }
   }
+  .toggle-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      background-color: lighten($purple, 10%);
+      color: white;
+      transition: background 0.3s ease;
+  
+      &.active {
+        background-color: $purple;
+      }
+  
+      &:hover {
+        background-color: darken($purple, 10%);
+      }
+    }
+  }
+  
+  .monthly-summary {
+    text-align: center;
+    margin-bottom: 20px;
+  
+    h3, h2 {
+      margin: 8px 0;
+      font-family: 'Lato';
+      font-weight: bold;
+    }
+  
+    h2 {
+      color: $green;
+      font-size: 1.6rem;
+    }
+  }
+
+  .daily-total-row {
+  td {
+    font-weight: bold;
+    padding-top: 16px;
+    background-color: lighten($light-grey, 5%);
+    text-align: right;
+
+    span.label {
+      color: black;
+      font-weight: bold;
+    }
+
+    .daily-income-amount {
+      color: lighten($green, 5%);
+      margin-right: 16px;
+    }
+
+    .daily-expense-amount {
+      color: lighten($red, 5%);
+    }
+  }
+}
+
   
