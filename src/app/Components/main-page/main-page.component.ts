@@ -19,8 +19,24 @@ export class MainPageComponent implements OnInit {
     const saved = localStorage.getItem('budgetItems');
     if (saved) {
       this.budgetItems = JSON.parse(saved);
-      this.totalBudget = this.budgetItems.filter(i => i.type === 'expense').reduce((sum, i) => sum + i.amount, 0);
-      this.totalIncome = this.budgetItems.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0);
+      // Fix old items missing `type`
+        this.budgetItems.forEach(item => {
+          if (!item.type) {
+            item.type = 'expense';  // assume old entries are expenses
+          }
+        });
+    
+        // Update localStorage to reflect the fix
+    localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
+
+    // Recalculate totals
+    this.totalBudget = this.budgetItems
+      .filter(i => i.type === 'expense')
+      .reduce((sum, i) => sum + i.amount, 0);
+
+    this.totalIncome = this.budgetItems
+      .filter(i => i.type === 'income')
+      .reduce((sum, i) => sum + i.amount, 0);
     }
   }
 
@@ -146,6 +162,18 @@ export class MainPageComponent implements OnInit {
     const items = this.getGroupedItemsByDate()[dateLabel] || [];
     return items
       .filter(i => i.type === type)
+      .reduce((sum, i) => sum + i.amount, 0);
+  }
+
+  getDailyIncome(items: BudgetItem[]): number {
+    return items
+      .filter(i => i.type === 'income')
+      .reduce((sum, i) => sum + i.amount, 0);
+  }
+
+  getDailyExpense(items: BudgetItem[]): number {
+    return items
+      .filter(i => i.type === 'expense')
       .reduce((sum, i) => sum + i.amount, 0);
   }
 }

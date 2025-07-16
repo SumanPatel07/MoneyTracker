@@ -202,5 +202,25 @@
     }
   }
 }
+.daily-summary {
+  margin-bottom: 10px;
+  font-weight: bold;
+  display: flex;
+  gap: 20px;
+
+  .daily-label {
+    font-size: 14px;
+    color: $dark;
+
+    &:nth-child(1) {
+      color: $green;
+    }
+
+    &:nth-child(2) {
+      color: $red;
+    }
+  }
+}
+
 
   
