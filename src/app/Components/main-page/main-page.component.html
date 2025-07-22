@@ -11,18 +11,75 @@
 <div class="monthly-summary">
   <h3>Total Income: ₹{{ totalIncome }}</h3>
   <h3>Total Expense: ₹{{ totalBudget }}</h3>
-  <h2>Remaining Balance: ₹{{ totalIncome - totalBudget }}</h2>
+  <h2>Remaining Balance: 
+    <span [ngClass]="{'positive': totalIncome - totalBudget >= 0, 'negative': totalIncome - totalBudget < 0}">
+      ₹{{ totalIncome - totalBudget }}
+    </span>
+  </h2>
 </div>
 
-<!-- Add Item Section -->
-<div class="add-item-section">
-  <div class="add-item-container">
+<!-- Wrapper -->
+<div class="add-item-wrapper" style="
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  min-height: 500px; /* or auto based on form height */
+  background-color: #f9f9f9;
+  border-radius: 12px;
+">
+
+  <!-- Chart container on the far left -->
+  <div class="chart-container" style="
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 360px;
+    background: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 24px;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  ">
+
+    <!-- Chart must fully fill the container -->
+    <div style="position: relative; width: 100%; height: 100%;">
+      <canvas baseChart
+        [data]="{
+          labels: pieChartLabels,
+          datasets: [{
+            data: pieChartData,
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8BC34A', '#9C27B0', '#03A9F4']
+          }]
+        }"
+        [type]="pieChartType"
+        [options]="{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' },
+            title: { display: true, text: 'This Month Expenses' }
+          }
+        }"
+      ></canvas>
+    </div>
+
+  </div>
+
+  <!-- Add-item container in center -->
+  <div class="add-item-container" style="z-index: 1;">
     <app-add-item-form
       [type]="formType"
       (formSubmit)="addItem($event)">
     </app-add-item-form>
   </div>
 </div>
+
 
 <!-- Grouped Budget Items Table -->
 <div class="grouped-budget-items">

@@ -7,6 +7,7 @@ import { MainPageComponent } from './Components/main-page/main-page.component';
 import { HeaderComponent } from './Components/header/header.component';
 import { AddItemFormComponent } from './add-item-form/add-item-form.component';
 import { FormsModule } from '@angular/forms';
+import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { FormsModule } from '@angular/forms';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

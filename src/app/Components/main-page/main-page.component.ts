@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ChartConfiguration } from 'chart.js';
 import { BudgetItem } from 'src/shared/models//budget-item.model';
 
 @Component({
@@ -14,6 +15,11 @@ export class MainPageComponent implements OnInit {
   editedItem: BudgetItem = new BudgetItem('',0,'','','');
   totalIncome: number = 0;
   formType: 'income' | 'expense' = 'expense';
+
+  // Chart variables
+  pieChartLabels: string[] = [];
+  pieChartData: number[] = [];
+  pieChartType: ChartConfiguration<'pie'>['type'] = 'pie';
 
   ngOnInit(): void {
     const saved = localStorage.getItem('budgetItems');
@@ -38,6 +44,8 @@ export class MainPageComponent implements OnInit {
       .filter(i => i.type === 'income')
       .reduce((sum, i) => sum + i.amount, 0);
     }
+
+    this.updateChartData();
   }
 
   addItem(newItem: BudgetItem){
@@ -55,6 +63,7 @@ export class MainPageComponent implements OnInit {
       return dateB.getTime() - dateA.getTime();
     });
     localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
+    this.updateChartData();
   }
 
   deleteItem(item: BudgetItem) {
@@ -70,6 +79,35 @@ export class MainPageComponent implements OnInit {
 
       localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
     }
+    this.updateChartData();
+  }
+
+  updateItem() {
+    if(this.editedItem.name.trim() && this.editedItem.amount > 0 && this.editedItem.category) 
+      {
+        const currentItem = this.budgetItems[this.editIndex!];
+
+        if(currentItem.type === 'income')
+        {
+          this.totalIncome -= currentItem.amount;
+        }
+        else {
+          this.totalBudget -= currentItem.amount;
+        }
+
+        this.budgetItems[this.editIndex!] = {...this.editedItem};
+
+        if (this.editedItem.type === 'income') {
+          this.totalIncome += this.editedItem.amount;
+        } else {
+          this.totalBudget += this.editedItem.amount;
+        }
+
+        localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
+
+        this.cancelEdit();
+    }
+    this.updateChartData();
   }
 
   getGroupedItemsByDate() {
@@ -131,33 +169,6 @@ export class MainPageComponent implements OnInit {
     this.editedItem = new BudgetItem('',0,'','','');
   }
 
-  updateItem() {
-    if(this.editedItem.name.trim() && this.editedItem.amount > 0 && this.editedItem.category) 
-      {
-        const currentItem = this.budgetItems[this.editIndex!];
-
-        if(currentItem.type === 'income')
-        {
-          this.totalIncome -= currentItem.amount;
-        }
-        else {
-          this.totalBudget -= currentItem.amount;
-        }
-
-        this.budgetItems[this.editIndex!] = {...this.editedItem};
-
-        if (this.editedItem.type === 'income') {
-          this.totalIncome += this.editedItem.amount;
-        } else {
-          this.totalBudget += this.editedItem.amount;
-        }
-
-        localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
-
-        this.cancelEdit();
-    }
-  }
-  
   getDayTotal(dateLabel: string, type: 'income' | 'expense'): number {
     const items = this.getGroupedItemsByDate()[dateLabel] || [];
     return items
@@ -175,5 +186,25 @@ export class MainPageComponent implements OnInit {
     return items
       .filter(i => i.type === 'expense')
       .reduce((sum, i) => sum + i.amount, 0);
+  }
+
+  updateChartData() {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    const currentMonthExpenses = this.budgetItems.filter(item => {
+      const date = new Date(item.timestamp || '');
+      return item.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+
+    const categoryTotals: { [category: string]: number } = {};
+
+    for (const item of currentMonthExpenses) {
+      const category = item.category || 'Uncategorized';
+      categoryTotals[category] = (categoryTotals[category] || 0) + item.amount;
+    }
+
+    this.pieChartLabels = Object.keys(categoryTotals);
+    this.pieChartData = Object.values(categoryTotals);
   }
 }
