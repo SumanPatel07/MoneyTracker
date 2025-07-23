@@ -45,27 +45,27 @@ export class AddItemFormComponent {
 
     //Reset the form
     this.name = '';
-    this.amount = 0;
+    this.amount = null;
     this.category = 'Food';
     this.details = '';
-    this.timestamp = new Date().toISOString().substring(0, 16);
+    this.timestamp = this.getCurrentISTDateTime();
   }
 
   getCurrentISTDateTime(): string {
-  const now = new Date();
+    const now = new Date();
 
-  // IST offset in minutes
-  const IST_OFFSET_MINUTES = -330;
+    // IST offset in minutes
+    const IST_OFFSET_MINUTES = -330;
 
-  // Check if user is already in IST
-  if (now.getTimezoneOffset() === IST_OFFSET_MINUTES) {
-    return this.formatDateTimeForInput(now);
+    // Check if user is already in IST
+    if (now.getTimezoneOffset() === IST_OFFSET_MINUTES) {
+      return this.formatDateTimeForInput(now);
+    }
+
+    // Convert to IST if needed
+    const istTime = new Date(now.getTime() + (IST_OFFSET_MINUTES - now.getTimezoneOffset()) * 60000);
+    return this.formatDateTimeForInput(istTime);
   }
-
-  // If not in IST, convert to IST
-  const istTime = new Date(now.getTime() + (IST_OFFSET_MINUTES - now.getTimezoneOffset()) * 60000);
-  return this.formatDateTimeForInput(istTime);
-}
 
 formatDateTimeForInput(date: Date): string {
   const year = date.getFullYear();
@@ -85,7 +85,7 @@ formatDateTimeForInput(date: Date): string {
 
   saveNewCategory() {
     const categoryName = this.newCategoryName.trim();
-    if(categoryName && !this.categories.includes(categoryName)) {
+    if (categoryName && !this.categories.includes(categoryName)) {
       this.categories.push(categoryName);
       localStorage.setItem('categories', JSON.stringify(this.categories));
     }
@@ -95,6 +95,8 @@ formatDateTimeForInput(date: Date): string {
   }
 
   get filteredCategories() {
-    return this.categories.filter(c => c.toLocaleLowerCase().includes(this.categorySearch.toLocaleLowerCase()));
+    return this.categories.filter(c =>
+      c.toLowerCase().includes(this.categorySearch.toLowerCase())
+    );
   }
 }

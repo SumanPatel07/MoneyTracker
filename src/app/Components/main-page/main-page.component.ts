@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ChartConfiguration } from 'chart.js';
 import { BudgetItem } from 'src/shared/models//budget-item.model';
+import { BudgetService } from '../../Services/budget.service';
 
 @Component({
   selector: 'app-main-page',
@@ -21,93 +22,53 @@ export class MainPageComponent implements OnInit {
   pieChartData: number[] = [];
   pieChartType: ChartConfiguration<'pie'>['type'] = 'pie';
 
+  constructor(private budgetService: BudgetService) {}
+
   ngOnInit(): void {
-    const saved = localStorage.getItem('budgetItems');
-    if (saved) {
-      this.budgetItems = JSON.parse(saved);
-      // Fix old items missing `type`
-        this.budgetItems.forEach(item => {
-          if (!item.type) {
-            item.type = 'expense';  // assume old entries are expenses
-          }
-        });
-    
-        // Update localStorage to reflect the fix
-    localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
-
-    // Recalculate totals
-    this.totalBudget = this.budgetItems
-      .filter(i => i.type === 'expense')
-      .reduce((sum, i) => sum + i.amount, 0);
-
-    this.totalIncome = this.budgetItems
-      .filter(i => i.type === 'income')
-      .reduce((sum, i) => sum + i.amount, 0);
-    }
-
-    this.updateChartData();
+    this.fetchBudgetItems();
   }
 
-  addItem(newItem: BudgetItem){
-    this.budgetItems.push(newItem);
+  fetchBudgetItems() {
+    this.budgetService.getBudgetItems().subscribe(
+      (items: BudgetItem[]) => {
+        this.budgetItems = items;
+        this.totalIncome = this.budgetItems
+          .filter(i => i.type === 'income')
+          .reduce((sum, i) => sum + i.amount, 0);
+        this.totalBudget = this.budgetItems
+          .filter(i => i.type === 'expense')
+          .reduce((sum, i) => sum + i.amount, 0);
+        this.updateChartData();
+      },
+      (error) => console.error('Error fetching budget items', error)
+    );
+  }
 
-    if (newItem.type === 'income') {
-      this.totalIncome += newItem.amount;
-    } else {
-      this.totalBudget += newItem.amount;
-    }
-
-    this.budgetItems.sort((a, b) => {
-      const dateA = new Date(a.timestamp || '');
-      const dateB = new Date(b.timestamp || '');
-      return dateB.getTime() - dateA.getTime();
-    });
-    localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
-    this.updateChartData();
+  addItem(newItem: BudgetItem) {
+    this.budgetService.addBudgetItem(newItem).subscribe(
+      () => this.fetchBudgetItems(),
+      (error) => console.error('Error adding item', error)
+    );
   }
 
   deleteItem(item: BudgetItem) {
-    const index = this.budgetItems.indexOf(item);
-    if (index > -1) {
-      this.budgetItems.splice(index, 1);
-
-      if (item.type === 'income') {
-        this.totalIncome -= item.amount;
-      } else {
-       this.totalBudget -= item.amount;
-      }
-
-      localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
-    }
-    this.updateChartData();
+    if (!item._id) return;
+    this.budgetService.deleteBudgetItem(item._id).subscribe(
+      () => this.fetchBudgetItems(),
+      (error) => console.error('Error deleting item', error)
+    );
   }
 
   updateItem() {
-    if(this.editedItem.name.trim() && this.editedItem.amount > 0 && this.editedItem.category) 
-      {
-        const currentItem = this.budgetItems[this.editIndex!];
-
-        if(currentItem.type === 'income')
-        {
-          this.totalIncome -= currentItem.amount;
-        }
-        else {
-          this.totalBudget -= currentItem.amount;
-        }
-
-        this.budgetItems[this.editIndex!] = {...this.editedItem};
-
-        if (this.editedItem.type === 'income') {
-          this.totalIncome += this.editedItem.amount;
-        } else {
-          this.totalBudget += this.editedItem.amount;
-        }
-
-        localStorage.setItem('budgetItems', JSON.stringify(this.budgetItems));
-
-        this.cancelEdit();
+    if (this.editIndex !== null && this.editedItem._id) {
+      this.budgetService.updateBudgetItem(this.editedItem._id, this.editedItem).subscribe(
+        () => {
+          this.fetchBudgetItems();
+          this.cancelEdit();
+        },
+        (error) => console.error('Error updating item', error)
+      );
     }
-    this.updateChartData();
   }
 
   getGroupedItemsByDate() {
@@ -115,8 +76,8 @@ export class MainPageComponent implements OnInit {
 
     for (const item of this.budgetItems) {
       const label = this.getDataLabel(item.timestamp || '');
-      if(!grouped[label]) grouped[label] = [];
-        grouped[label].push(item);
+      if (!grouped[label]) grouped[label] = [];
+      grouped[label].push(item);
     }
 
     return grouped;
@@ -132,15 +93,15 @@ export class MainPageComponent implements OnInit {
     const todayStr = today.toISOString().split('T')[0];
     const yestStr = yesterday.toISOString().split('T')[0];
 
-    if(itemStr === todayStr) return 'Today';
-    if(itemStr === yestStr) return 'Yesterday';
+    if (itemStr === todayStr) return 'Today';
+    if (itemStr === yestStr) return 'Yesterday';
     return itemDate.toLocaleDateString();
   }
 
   getGroupedKeys(): string[] {
     const keys = Object.keys(this.getGroupedItemsByDate());
-      
-      return keys.sort((a, b) => {
+
+    return keys.sort((a, b) => {
       const dateA = this.convertToDate(a);
       const dateB = this.convertToDate(b);
       return dateB.getTime() - dateA.getTime();
@@ -155,18 +116,17 @@ export class MainPageComponent implements OnInit {
     yesterday.setDate(today.getDate() - 1);
     if (label === 'Yesterday') return yesterday;
 
-    // fallback: parse actual date
     return new Date(label);
   }
 
   startEdit(item: BudgetItem) {
     this.editIndex = this.budgetItems.indexOf(item);
-    this.editedItem = {...item};
+    this.editedItem = { ...item };
   }
 
   cancelEdit() {
     this.editIndex = null;
-    this.editedItem = new BudgetItem('',0,'','','');
+    this.editedItem = new BudgetItem('', 0, '', '', '', 'expense');
   }
 
   getDayTotal(dateLabel: string, type: 'income' | 'expense'): number {
