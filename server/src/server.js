@@ -13,6 +13,10 @@ app.use(express.json());
 //Routes
 app.use('/api/items', budgetRoutes);
 
+app.get('/', (req, res) => {
+  res.send('MoneyTracker API is running');
+});
+
 // Connect DB & start
 const PORT = process.env.PORT || 3000;
 connectDB(process.env.MONGODB_URI).then(() => {

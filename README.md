@@ -62,7 +62,8 @@ Installs angular-cli-ghpages and sets up deployment support.
 🛠️ Step 2: Build the Angular app for production
 Use this exact command (change repo name as needed):
 
-ng build --configuration production --base-href "https://SumanPatel07.github.io/MoneyTracker/"
+ng build --configuration production --base-href /MoneyTracker/
+
 This creates the build files at:
 
 dist/money-tracker/

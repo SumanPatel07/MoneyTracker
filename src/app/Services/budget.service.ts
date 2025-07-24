@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class BudgetService {
-  private apiUrl = 'http://localhost:3000/api/items';
+private apiUrl = 'https://moneytracker-dor8.onrender.com/api/items';
 
   constructor(private http: HttpClient) {}
 
