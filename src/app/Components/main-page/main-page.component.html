@@ -3,52 +3,29 @@
   <h1>Budget Calculator</h1>
 </div>
 
+<!-- Toggle Buttons -->
 <div class="toggle-buttons">
   <button [class.active]="formType === 'expense'" (click)="formType = 'expense'">Add Expense</button>
-  <button [class.active]="formType === 'income'" (click)="formType = 'income'">Add income</button>
+  <button [class.active]="formType === 'income'" (click)="formType = 'income'">Add Income</button>
 </div>
 
+<!-- Monthly Summary -->
 <div class="monthly-summary">
   <h3>Total Income: ₹{{ totalIncome }}</h3>
   <h3>Total Expense: ₹{{ totalBudget }}</h3>
-  <h2>Remaining Balance: 
-    <span [ngClass]="{'positive': totalIncome - totalBudget >= 0, 'negative': totalIncome - totalBudget < 0}">
+  <h2>
+    Remaining Balance:
+    <span [ngClass]="{ 'positive': totalIncome - totalBudget >= 0, 'negative': totalIncome - totalBudget < 0 }">
       ₹{{ totalIncome - totalBudget }}
     </span>
   </h2>
 </div>
 
-<!-- Wrapper -->
-<div class="add-item-wrapper" style="
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding: 24px;
-  min-height: 500px; /* or auto based on form height */
-  background-color: #f9f9f9;
-  border-radius: 12px;
-">
+<div class="input-chart-wrapper">
 
-  <!-- Chart container on the far left -->
-  <div class="chart-container" style="
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    height: 100%;
-    width: 360px;
-    background: #ffffff;
-    border-right: 1px solid #e0e0e0;
-    padding: 24px;
-    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  ">
-
-    <!-- Chart must fully fill the container -->
-    <div style="position: relative; width: 100%; height: 100%;">
+  <!-- Charts Stack (Expense + Income) -->
+  <div class="charts-stack">
+    <div class="chart-container">
       <canvas baseChart
         [data]="{
           labels: pieChartLabels,
@@ -69,22 +46,43 @@
       ></canvas>
     </div>
 
+    <div class="chart-container">
+      <canvas baseChart
+        [data]="{
+          labels: incomeChartLabels,
+          datasets: [{
+            data: incomeChartData,
+            backgroundColor: ['#4CAF50', '#8BC34A', '#CDDC39', '#00BCD4', '#03A9F4', '#009688']
+          }]
+        }"
+        [type]="pieChartType"
+        [options]="{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' },
+            title: { display: true, text: 'This Month Income' }
+          }
+        }"
+      ></canvas>
+    </div>
   </div>
 
-  <!-- Add-item container in center -->
-  <div class="add-item-container" style="z-index: 1;">
+  <!-- Form -->
+  <div class="add-item-container">
     <app-add-item-form
       [type]="formType"
       (formSubmit)="addItem($event)">
     </app-add-item-form>
   </div>
+
 </div>
 
-
-<!-- Grouped Budget Items Table -->
+<!-- Grouped Table -->
 <div class="grouped-budget-items">
   <div *ngFor="let date of getGroupedKeys()">
     <h2>{{ date }}</h2>
+
     <table>
       <thead>
         <tr>
@@ -93,37 +91,39 @@
           <th>Category</th>
           <th>Details</th>
           <th>Time</th>
-          <th>Type</th> <!-- New header -->
+          <th>Type</th>
           <th>Actions</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let item of getGroupedItemsByDate()[date]; let i = index">
-          
-          <!-- Show Regular Row -->
+          <!-- Normal Row -->
           <ng-container *ngIf="editIndex !== budgetItems.indexOf(item); else editRow">
             <td>{{ item.name }}</td>
             <td>{{ item.amount }}</td>
             <td>{{ item.category }}</td>
             <td>{{ item.details || '-' }}</td>
             <td>{{ item.timestamp | date: 'shortTime' }}</td>
-            <td>{{ item.type }}</td> <!-- New column -->
+            <td>{{ item.type }}</td>
             <td>
               <button class="edit-btn" (click)="startEdit(item)">Edit</button>
               <button class="delete-btn" (click)="deleteItem(item)">Delete</button>
             </td>
           </ng-container>
 
-          <!-- Editable Row Template -->
+          <!-- Editable Row -->
           <ng-template #editRow>
             <td><input [(ngModel)]="editedItem.name" /></td>
             <td><input type="number" [(ngModel)]="editedItem.amount" /></td>
-            <td><input [(ngModel)]="editedItem.category" /></td>
+            <td>
+              <select [(ngModel)]="editedItem.category">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </td>
             <td><input [(ngModel)]="editedItem.details" /></td>
             <td><input type="datetime-local" [(ngModel)]="editedItem.timestamp" /></td>
             <td>
-              <!-- Type Dropdown -->
               <select [(ngModel)]="editedItem.type">
                 <option value="expense">Expense</option>
                 <option value="income">Income</option>
@@ -135,14 +135,16 @@
             </td>
           </ng-template>
         </tr>
-        <!-- 🟢 Daily Totals Row -->
-      <tr class="daily-total-row">
-        <td colspan="7">
-          <span class="label">Total Income : </span>
-          <span class="daily-income-amount">₹{{ getDayTotal(date, 'income') }}</span> |
-          <span class="label">Total Expense : </span>
-          <span class="daily-expense-amount">₹{{ getDayTotal(date, 'expense') }}</span>
-        </td>
+
+        <!-- Daily Totals -->
+        <tr class="daily-total-row">
+          <td colspan="7">
+            <span class="label">Total Income:</span>
+            <span class="daily-income-amount">₹{{ getDayTotal(date, 'income') }}</span> |
+            <span class="label">Total Expense:</span>
+            <span class="daily-expense-amount">₹{{ getDayTotal(date, 'expense') }}</span>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

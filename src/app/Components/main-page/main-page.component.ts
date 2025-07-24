@@ -17,10 +17,16 @@ export class MainPageComponent implements OnInit {
   totalIncome: number = 0;
   formType: 'income' | 'expense' = 'expense';
 
+   // ✅ Categories list
+  categories: string[] = [];
+
   // Chart variables
   pieChartLabels: string[] = [];
   pieChartData: number[] = [];
   pieChartType: ChartConfiguration<'pie'>['type'] = 'pie';
+
+  incomeChartLabels: string[] = [];
+  incomeChartData: number[] = [];
 
   constructor(private budgetService: BudgetService) {}
 
@@ -32,6 +38,10 @@ export class MainPageComponent implements OnInit {
     this.budgetService.getBudgetItems().subscribe(
       (items: BudgetItem[]) => {
         this.budgetItems = items;
+
+        // ✅ Extract unique categories
+        this.categories = [...new Set(items.map(i => i.category).filter(Boolean))];
+
         this.totalIncome = this.budgetItems
           .filter(i => i.type === 'income')
           .reduce((sum, i) => sum + i.amount, 0);
@@ -44,9 +54,16 @@ export class MainPageComponent implements OnInit {
     );
   }
 
-  addItem(newItem: BudgetItem) {
+   addItem(newItem: BudgetItem) {
     this.budgetService.addBudgetItem(newItem).subscribe(
-      () => this.fetchBudgetItems(),
+      () => {
+        this.fetchBudgetItems();
+
+        // ✅ Add new category to list if not present
+        if (newItem.category && !this.categories.includes(newItem.category)) {
+          this.categories.push(newItem.category);
+        }
+      },
       (error) => console.error('Error adding item', error)
     );
   }
@@ -63,6 +80,14 @@ export class MainPageComponent implements OnInit {
     if (this.editIndex !== null && this.editedItem._id) {
       this.budgetService.updateBudgetItem(this.editedItem._id, this.editedItem).subscribe(
         () => {
+          // ✅ Update categories after edit
+          if (
+            this.editedItem.category &&
+            !this.categories.includes(this.editedItem.category)
+          ) {
+            this.categories.push(this.editedItem.category);
+          }
+          
           this.fetchBudgetItems();
           this.cancelEdit();
         },
@@ -152,19 +177,35 @@ export class MainPageComponent implements OnInit {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
+    //EXPENSE chart
     const currentMonthExpenses = this.budgetItems.filter(item => {
       const date = new Date(item.timestamp || '');
       return item.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
     });
 
-    const categoryTotals: { [category: string]: number } = {};
+    const expensecategoryTotals: { [category: string]: number } = {};
 
     for (const item of currentMonthExpenses) {
       const category = item.category || 'Uncategorized';
-      categoryTotals[category] = (categoryTotals[category] || 0) + item.amount;
+      expensecategoryTotals[category] = (expensecategoryTotals[category] || 0) + item.amount;
     }
 
-    this.pieChartLabels = Object.keys(categoryTotals);
-    this.pieChartData = Object.values(categoryTotals);
+    this.pieChartLabels = Object.keys(expensecategoryTotals);
+    this.pieChartData = Object.values(expensecategoryTotals);
+
+    //INCOME chart
+    const currentMonthIncome = this.budgetItems.filter(item => {
+      const date = new Date(item.timestamp || '');
+      return item.type === 'income' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+
+    const incomeCategoryTotals: { [category: string]: number } = {};
+    for (const item of currentMonthIncome) {
+      const category = item.category || 'Uncategorized';
+      incomeCategoryTotals[category] = (incomeCategoryTotals[category] || 0) + item.amount;
+    }
+
+    this.incomeChartLabels = Object.keys(incomeCategoryTotals);
+    this.incomeChartData = Object.values(incomeCategoryTotals);
   }
 }
