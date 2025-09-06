@@ -3,7 +3,7 @@
 @charset "utf-8";
 
 // Import a Google Font
-@import url('https://fonts.googleapis.com/css?family=Nunito:400,700|Lato:300,900');
+@import url('https://fonts.googleapis.com/css?family=Lato:400,700|Nunito:400,700');
 
 // Set your brand colors
 $purple: rgb(159, 104, 235);
@@ -28,3 +28,624 @@ $control-border-width: 2px;
 $input-border-color: transparent;
 $input-background-color: $light-grey;
 $input-shadow: none;
+// Color Variables
+$turquoise: #44ddd0;
+$light-green: #45f69e;
+$dark-green: rgb(0, 100, 80);
+$purple: #a59ad7;
+$pink: #fe76c2;
+$blue: #37c7f2;
+$light-red: #e05656;
+$light: #fafcff;
+$dark: #3d4a51;
+$green: #0bf387;
+
+// Global Styles
+//html {
+  //background: linear-gradient(to right top, $turquoise, $green);
+//}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px !important;
+  overflow: auto
+}
+
+.centered-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    padding: 20px; /* Adds space around the edges */
+}
+
+.white-box {
+    padding: 35px;
+    background: white;
+    border-radius: 5px;
+    width: 350px;
+    max-width: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow for better distinction */
+    display: flex;
+    flex-direction: column; /* Arrange content vertically */
+    align-items: center; /* Center child elements inside */
+}
+
+.title {
+  font-family: 'Lato', sans-serif;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-align: center; /* Center text alignment */
+  color: $green; /* Use primary color for better visibility */
+}
+
+.modal-box {
+  min-height: 200px;
+  width: 100%;
+  max-width: 580px;
+  background: white;
+  border-radius: 5px;
+  padding: 35px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for emphasis */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centers content vertically within the box */
+  align-items: center; /* Centers content horizontally */
+}
+
+.field {
+  width: 100%; /* Ensure input fields stretch across the white-box width */
+}
+
+input {
+  width: 100%; /* Full width for inputs to look uniform */
+}
+
+.button.is-success {
+  width: 100%; /* Full width button to match input fields */
+  background-color: $green;
+}
+
+.has-text-grey {
+  text-align: center; /* Center text and links below the form */
+}
+
+p.control {
+  margin-top: 10px; /* Add space between button and other elements */
+}
+
+// Sidenav Styles
+.sidenav {
+    background: $dark-green;
+    transition: all .5s ease;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    width: 5rem;
+    height: 100vh;
+    box-shadow: 0.063rem 0 1.25rem 0 #8690a3;
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        padding: 0.938rem 0.938rem 0 0.938rem;
+        width: 100%;
+
+        .logo {
+            background: #fff;
+            text-align: center;
+            width: 3rem;
+            min-width: 3rem;
+            border-radius: 0.313rem;
+            padding: 0.313rem;
+            font-size: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            border: none;
+        }
+
+        .logo-text {
+            margin-left: 1.5rem;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .btn-close {
+            margin-left: auto;
+            cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: transparent;
+            border: none;
+
+            .fa-times {
+                color: #fff;
+                font-size: 24px;
+            }
+        }
+    }
+}
+
+.sidenav-collapsed {
+    width: 16.5625rem;
+}
+
+.sidenav-nav {
+    list-style: none;
+    padding: 0.938rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+
+    .sidenav-nav-item {
+        width: 100%;
+        margin-bottom: 0.625rem;
+
+        .sidenav-nav-link {
+            display: flex;
+            align-items: center;
+            height: 3rem;
+            color: #f3f3f3;
+            text-decoration: none;
+            border-radius: 0.625rem;
+            transition: all .3s ease;
+
+            .sidenav-link-icon {
+                font-size: 22px;
+                width: 2rem;
+                min-width: 2rem;
+                margin: 0 0.5rem;
+                text-align: center;
+            }
+
+            .sidenav-link-text {
+                margin-left: 1.5rem;
+            }
+        }
+
+        .sidenav-nav-link:hover {
+            background-color: #fff;
+            color: #000;
+
+            .menu-collapse-icon {
+                color: #000;
+            }
+        }
+    }
+}
+
+.active {
+    background-color: #fff;
+
+    .menu-collapse-icon,
+    .sidenav-link-icon,
+    .sidenav-link-text {
+        color: #000;
+    }
+}
+
+.active-sublevel {
+    color: #f3f3f3 !important;
+    // opacity: 1 !important;
+}
+
+.menu-collapse-icon {
+    font-size: 25px;
+    width: 2rem;
+    min-width: 2rem;
+    margin: auto 0.5rem auto auto;
+    text-align: center;
+    color: #f3f3f3;
+}
+
+.sublevel-nav {
+    list-style: none;
+    margin-left: 10px;
+
+    .sublevel-nav-item {
+        .sublevel-nav-link {
+            display: flex;
+            align-items: center;
+            height: 3rem;
+            color: #898989;
+            text-decoration: none;
+            border-radius: 0.625rem;
+            transition: all .3s ease;
+
+            .sublevel-link-icon {
+                font-size: 4px;
+                width: 2rem;
+                min-width: 2rem;
+                margin: 0 0.5rem;
+                text-align: center;
+            }
+
+            .sublevel-link-text {
+                margin-left: 0.8rem;
+            }
+        }
+
+        .sublevel-nav-link:hover {
+            color: #f3f3f3;
+        }
+    }
+}
+
+//scrollbar and visibility on hover and focus
+.scrollwrap {
+    overflow-y: auto;
+    visibility: hidden;
+    height: calc(100% - 3.65rem);
+}
+
+.sidenav-nav,
+.scrollwrap:hover,
+.scrollwrap:focus {
+    visibility: visible;
+}
+
+.scrollwrap_delayed {
+    transition: visibility 0.5s 0.2s;
+}
+
+.scrollwrap_delayed:hover {
+    transition: visibility 0.2s 0.2s;
+}
+
+// works on chrome, edge and safari
+.scrollwrap::-webkit-scrollbar {
+    width: 10px;
+}
+
+.scrollwrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollwrap::-webkit-scrollbar-thumb {
+    background-color: #556268;
+    border-radius: 20px;
+}
+
+// works on firefox
+.scrollwrap {
+    scrollbar-width: thin;
+    scrollbar-color: #556268 transparent;
+}
+
+// Body Styles
+.body {
+    width: calc(100% - 5rem);
+    height: 100vh;
+    margin-left: 5rem;
+    z-index: 0;
+    position: relative;
+    top: 0;
+    transition: all .5s ease;
+    background: #f4f7fa;
+    padding: 3rem;
+    background: linear-gradient(to right top, $turquoise, $green);
+}
+
+.body-trimmed {
+    width: calc(100% - 16.5625rem);
+    margin-left: 16.5625rem;
+}
+
+.body-md-screen {
+    width: calc(100% - 5rem);
+    margin-left: 5rem;
+}
+
+// Task Manager Styles
+.task-manager-container {
+    display: flex;
+    width: 100vw;           /* Full width */
+    height: 100vh; 
+    max-width: 1000px;
+    max-height: 680px;
+    background: #fff; // Add a contrasting background color
+    padding: 20px;
+    overflow: hidden;       /* Prevent scroll bars from appearing due to overflow */
+    box-sizing: border-box;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    background: white;
+    padding: 42px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.task-list-container {
+    position: relative; /* Ensure this parent has a positioning context */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 42px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    overflow-y: auto;        /* Handles overflow with a scroll */
+    margin: 10px 0; 
+
+    .top-bar {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center; /* Ensure the content is aligned */
+        position: relative; /* Set relative positioning for child absolute positioning */
+
+        .title {
+            flex-grow: 1;
+            margin: 0;
+        }
+    }
+
+    .circle-add-button {
+        position: absolute;
+        bottom: 20px; /* Adjust as needed for your layout */
+        right: 20px; /* Adjust as needed for your layout */
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+        background-color: $green; /* Example color, adjust as needed */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: add a shadow */
+        cursor: pointer;
+        color: white;
+
+        &:hover {
+            transform: scale(1.05); /* Optional: subtle hover effect */
+        }
+    }
+}
+
+.list-menu {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+    flex-grow: 1;
+
+    .list-menu-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        border-radius: 5px;
+        width: 100%;
+        color: #5f5f5f;
+        margin-bottom: 5px;
+
+        &:hover {
+            background: $light;
+        }
+
+        &.is-active {
+            background-color: #cff8ef;
+            color: $dark-green;
+        }
+    }
+}
+
+.task {
+    display: flex;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    margin-top: 10px;
+    align-items: center;
+
+    &:not(.complete) {
+        cursor: pointer;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+        &:active {
+            transform: scale(0.95);
+        }
+
+        &:hover {
+            box-shadow: 0 0 0 5px #eeeeee;
+
+            .task-buttons {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    }
+
+    &.completed .task-text {
+        text-decoration: line-through;
+        opacity: 0.8;
+    }
+
+    &.completed {
+        text-decoration: line-through;
+        opacity: 0.8;
+    }
+
+    .task-text {
+        display: flex;
+        flex-grow: 1;
+    }
+
+    .task-buttons {
+        transition: opacity 0.2s, transform 0.2s;
+        opacity: 0;
+        transform: scale(0.85);
+    }
+}
+
+.empty-state-text {
+    font-size: 20px;
+    color: #777;
+    text-align: center;
+}
+
+.floating-add-button {
+    position: fixed;
+    bottom: 0;
+    width: 500px;
+    border-radius: 0;
+
+    box-shadow: 0px 0px 15px 5px rgba($purple, 0.2);
+
+    height: 68px;
+    font-size: 24px;
+}
+
+app-note-card {
+    display: block;
+    margin-bottom: 25px;
+}
+
+.notes-list {
+    margin-top: 35px;
+    margin-bottom: 70px;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    margin: auto;
+    padding-top: 50px;
+}
+
+.form-container {
+    max-width: 500px;
+    margin: auto;
+    margin-top: 50px;
+}
+
+input, textarea {
+    &.ng-invalid.ng-touched {
+        border-color: red;
+        &:focus {
+            box-shadow: 0px 0px 0px 2px rgba(red, 0.1);
+        }
+    }
+}
+
+.layout-box {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background-color: white;
+
+    .page-content {
+        flex-grow: 1;
+        overflow-y: scroll;
+    }
+}
+
+.top-header-bar {
+    width: 100%;
+    height: 68px;
+    background: linear-gradient(to right, $pink, $blue) !important;
+    box-shadow: 0px 0px 10px 0px rgba(black, 0.15);
+    display: flex;
+    flex-shrink: 0; // to prevent the top bar from shrinking
+
+    // Center child element (the heading)
+    justify-content: center;
+    align-items: center;
+
+    h1 {
+        color: white;
+        font-size: 24px;
+    }
+}
+
+.note-card-container {
+    position: relative;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0px 2px 15px 2px rgba(black, 0.068);
+    transition: box-shadow 0.2s ease-out;
+
+    &:hover {
+        cursor: pointer;
+        box-shadow: 0px 0px 0px 4px rgba(black, 0.068);
+
+        .x-button {
+            opacity: 1;
+            transform: scale(1);
+
+            transition-delay: 0.35s;
+        }
+    }
+    
+    .note-card-content {
+        padding: 25px;
+        
+        .note-card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: $purple;
+        }
+
+        .note-card-body {
+            position: relative;
+            color: #555;
+
+            // The maximum height before it is truncated
+            max-height: 80px;
+            overflow: hidden;
+
+            .fade-out-truncation {
+                position: absolute;
+                pointer-events: none;                
+                bottom: 0;
+                height: 50%;
+                width: 100%;
+                background: linear-gradient(to bottom, rgba(white, 0) 0%, rgba(white, 0.8) 50%, white 100%);
+            }
+        }
+    }
+}
+
+.x-button {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    height: 34px;
+    width: 34px;
+    background-color: $light-red;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    opacity: 1; // Set to 1 if you want the button visible by default
+    transform: scale(1); // Set to 1 for normal size
+  
+    &:hover {
+      background-color: darken($light-red, 2%);
+    }
+  
+    &:active {
+      background-color: darken($light-red, 4%);
+    }
+  
+    i {
+      color: white; // Ensure the icon is visible against the button background
+      font-size: 16px; // Adjust as needed
+    }
+  }  
+
+

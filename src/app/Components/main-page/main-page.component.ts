@@ -54,19 +54,18 @@ export class MainPageComponent implements OnInit {
     );
   }
 
-   addItem(newItem: BudgetItem) {
-    this.budgetService.addBudgetItem(newItem).subscribe(
-      () => {
-        this.fetchBudgetItems();
+  normalizeDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString();
+}
 
-        // ✅ Add new category to list if not present
-        if (newItem.category && !this.categories.includes(newItem.category)) {
-          this.categories.push(newItem.category);
-        }
-      },
-      (error) => console.error('Error adding item', error)
-    );
+addItem(newItem: BudgetItem) {
+  if (newItem.timestamp) {
+    // Save exactly what user selects
+    newItem.timestamp = this.formatForStorage(newItem.timestamp);
   }
+  this.budgetService.addBudgetItem(newItem).subscribe(() => this.fetchBudgetItems());
+}
 
   deleteItem(item: BudgetItem) {
     if (!item._id) return;
@@ -76,52 +75,52 @@ export class MainPageComponent implements OnInit {
     );
   }
 
-  updateItem() {
-    if (this.editIndex !== null && this.editedItem._id) {
-      this.budgetService.updateBudgetItem(this.editedItem._id, this.editedItem).subscribe(
-        () => {
-          // ✅ Update categories after edit
-          if (
-            this.editedItem.category &&
-            !this.categories.includes(this.editedItem.category)
-          ) {
-            this.categories.push(this.editedItem.category);
-          }
-          
-          this.fetchBudgetItems();
-          this.cancelEdit();
-        },
-        (error) => console.error('Error updating item', error)
-      );
+updateItem() {
+  if (this.editIndex !== null && this.editedItem._id) {
+    if (this.editedItem.timestamp) {
+      // Keep timestamp as user entered
+      this.editedItem.timestamp = this.formatForStorage(this.editedItem.timestamp);
     }
+    this.budgetService.updateBudgetItem(this.editedItem._id, this.editedItem)
+      .subscribe(() => {
+        this.fetchBudgetItems();
+        this.cancelEdit();
+      });
   }
+}
+// Convert the datetime-local string exactly as entered
+formatForStorage(dateStr: string): string {
+  // No conversion; just return the string
+  return dateStr;
+}
 
   getGroupedItemsByDate() {
-    const grouped: { [dataLabel: string]: BudgetItem[] } = {};
+  const grouped: { [dataLabel: string]: BudgetItem[] } = {};
 
-    for (const item of this.budgetItems) {
-      const label = this.getDataLabel(item.timestamp || '');
-      if (!grouped[label]) grouped[label] = [];
-      grouped[label].push(item);
-    }
-
-    return grouped;
+  for (const item of this.budgetItems) {
+    const label = this.getDataLabel(item.timestamp || '');
+    if (!grouped[label]) grouped[label] = [];
+    grouped[label].push(item);
   }
+
+  return grouped;
+}
 
   getDataLabel(timestamp: string): string {
-    const itemDate = new Date(timestamp);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
+  const [date] = timestamp.split('T'); // split datetime
+  const itemDate = new Date(date);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
 
-    const itemStr = itemDate.toISOString().split('T')[0];
-    const todayStr = today.toISOString().split('T')[0];
-    const yestStr = yesterday.toISOString().split('T')[0];
+  const itemStr = itemDate.toLocaleDateString();
+  const todayStr = today.toLocaleDateString();
+  const yestStr = yesterday.toLocaleDateString();
 
-    if (itemStr === todayStr) return 'Today';
-    if (itemStr === yestStr) return 'Yesterday';
-    return itemDate.toLocaleDateString();
-  }
+  if (itemStr === todayStr) return 'Today';
+  if (itemStr === yestStr) return 'Yesterday';
+  return itemStr;
+}
 
   getGroupedKeys(): string[] {
     const keys = Object.keys(this.getGroupedItemsByDate());
@@ -145,9 +144,9 @@ export class MainPageComponent implements OnInit {
   }
 
   startEdit(item: BudgetItem) {
-    this.editIndex = this.budgetItems.indexOf(item);
-    this.editedItem = { ...item };
-  }
+  this.editIndex = this.budgetItems.indexOf(item);
+  this.editedItem = { ...item };
+}
 
   cancelEdit() {
     this.editIndex = null;
@@ -174,38 +173,48 @@ export class MainPageComponent implements OnInit {
   }
 
   updateChartData() {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
 
-    //EXPENSE chart
-    const currentMonthExpenses = this.budgetItems.filter(item => {
-      const date = new Date(item.timestamp || '');
-      return item.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-    });
+  // Helper to parse local datetime string
+  const parseLocalDate = (timestamp: string): Date => {
+    const [datePart, timePart] = timestamp.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  };
 
-    const expensecategoryTotals: { [category: string]: number } = {};
+  // EXPENSE chart
+  const currentMonthExpenses = this.budgetItems.filter(item => {
+    if (!item.timestamp) return false;
+    const date = parseLocalDate(item.timestamp);
+    return item.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  });
 
-    for (const item of currentMonthExpenses) {
-      const category = item.category || 'Uncategorized';
-      expensecategoryTotals[category] = (expensecategoryTotals[category] || 0) + item.amount;
-    }
-
-    this.pieChartLabels = Object.keys(expensecategoryTotals);
-    this.pieChartData = Object.values(expensecategoryTotals);
-
-    //INCOME chart
-    const currentMonthIncome = this.budgetItems.filter(item => {
-      const date = new Date(item.timestamp || '');
-      return item.type === 'income' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-    });
-
-    const incomeCategoryTotals: { [category: string]: number } = {};
-    for (const item of currentMonthIncome) {
-      const category = item.category || 'Uncategorized';
-      incomeCategoryTotals[category] = (incomeCategoryTotals[category] || 0) + item.amount;
-    }
-
-    this.incomeChartLabels = Object.keys(incomeCategoryTotals);
-    this.incomeChartData = Object.values(incomeCategoryTotals);
+  const expenseCategoryTotals: { [category: string]: number } = {};
+  for (const item of currentMonthExpenses) {
+    const category = item.category || 'Uncategorized';
+    expenseCategoryTotals[category] = (expenseCategoryTotals[category] || 0) + item.amount;
   }
+
+  this.pieChartLabels = Object.keys(expenseCategoryTotals);
+  this.pieChartData = Object.values(expenseCategoryTotals);
+
+  // INCOME chart
+  const currentMonthIncome = this.budgetItems.filter(item => {
+    if (!item.timestamp) return false;
+    const date = parseLocalDate(item.timestamp);
+    return item.type === 'income' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  });
+
+  const incomeCategoryTotals: { [category: string]: number } = {};
+  for (const item of currentMonthIncome) {
+    const category = item.category || 'Uncategorized';
+    incomeCategoryTotals[category] = (incomeCategoryTotals[category] || 0) + item.amount;
+  }
+
+  this.incomeChartLabels = Object.keys(incomeCategoryTotals);
+  this.incomeChartData = Object.values(incomeCategoryTotals);
+}
+
 }

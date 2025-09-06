@@ -5,8 +5,15 @@
 
 <!-- Toggle Buttons -->
 <div class="toggle-buttons">
-  <button [class.active]="formType === 'expense'" (click)="formType = 'expense'">Add Expense</button>
-  <button [class.active]="formType === 'income'" (click)="formType = 'income'">Add Income</button>
+  <button
+    [class.active]="formType === 'expense'"
+    (click)="formType = 'expense'"
+  >
+    Add Expense
+  </button>
+  <button [class.active]="formType === 'income'" (click)="formType = 'income'">
+    Add Income
+  </button>
 </div>
 
 <!-- Monthly Summary -->
@@ -15,24 +22,38 @@
   <h3>Total Expense: ₹{{ totalBudget }}</h3>
   <h2>
     Remaining Balance:
-    <span [ngClass]="{ 'positive': totalIncome - totalBudget >= 0, 'negative': totalIncome - totalBudget < 0 }">
+    <span
+      [ngClass]="{
+        positive: totalIncome - totalBudget >= 0,
+        negative: totalIncome - totalBudget < 0
+      }"
+    >
       ₹{{ totalIncome - totalBudget }}
     </span>
   </h2>
 </div>
 
 <div class="input-chart-wrapper">
-
   <!-- Charts Stack (Expense + Income) -->
   <div class="charts-stack">
     <div class="chart-container">
-      <canvas baseChart
+      <canvas
+        baseChart
         [data]="{
           labels: pieChartLabels,
-          datasets: [{
-            data: pieChartData,
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8BC34A', '#9C27B0', '#03A9F4']
-          }]
+          datasets: [
+            {
+              data: pieChartData,
+              backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#8BC34A',
+                '#9C27B0',
+                '#03A9F4'
+              ]
+            }
+          ]
         }"
         [type]="pieChartType"
         [options]="{
@@ -47,13 +68,23 @@
     </div>
 
     <div class="chart-container">
-      <canvas baseChart
+      <canvas
+        baseChart
         [data]="{
           labels: incomeChartLabels,
-          datasets: [{
-            data: incomeChartData,
-            backgroundColor: ['#4CAF50', '#8BC34A', '#CDDC39', '#00BCD4', '#03A9F4', '#009688']
-          }]
+          datasets: [
+            {
+              data: incomeChartData,
+              backgroundColor: [
+                '#4CAF50',
+                '#8BC34A',
+                '#CDDC39',
+                '#00BCD4',
+                '#03A9F4',
+                '#009688'
+              ]
+            }
+          ]
         }"
         [type]="pieChartType"
         [options]="{
@@ -70,12 +101,9 @@
 
   <!-- Form -->
   <div class="add-item-container">
-    <app-add-item-form
-      [type]="formType"
-      (formSubmit)="addItem($event)">
+    <app-add-item-form [type]="formType" (formSubmit)="addItem($event)">
     </app-add-item-form>
   </div>
-
 </div>
 
 <!-- Grouped Table -->
@@ -99,16 +127,20 @@
       <tbody>
         <tr *ngFor="let item of getGroupedItemsByDate()[date]; let i = index">
           <!-- Normal Row -->
-          <ng-container *ngIf="editIndex !== budgetItems.indexOf(item); else editRow">
+          <ng-container
+            *ngIf="editIndex !== budgetItems.indexOf(item); else editRow"
+          >
             <td>{{ item.name }}</td>
             <td>{{ item.amount }}</td>
             <td>{{ item.category }}</td>
-            <td>{{ item.details || '-' }}</td>
-            <td>{{ item.timestamp | date: 'shortTime' }}</td>
+            <td>{{ item.details || "-" }}</td>
+            <td>{{ item.timestamp | localDateFormat }}</td>
             <td>{{ item.type }}</td>
             <td>
               <button class="edit-btn" (click)="startEdit(item)">Edit</button>
-              <button class="delete-btn" (click)="deleteItem(item)">Delete</button>
+              <button class="delete-btn" (click)="deleteItem(item)">
+                Delete
+              </button>
             </td>
           </ng-container>
 
@@ -118,11 +150,18 @@
             <td><input type="number" [(ngModel)]="editedItem.amount" /></td>
             <td>
               <select [(ngModel)]="editedItem.category">
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                <option *ngFor="let cat of categories" [value]="cat">
+                  {{ cat }}
+                </option>
               </select>
             </td>
             <td><input [(ngModel)]="editedItem.details" /></td>
-            <td><input type="datetime-local" [(ngModel)]="editedItem.timestamp" /></td>
+            <td>
+              <input
+                type="datetime-local"
+                [(ngModel)]="editedItem.timestamp"
+              />
+            </td>
             <td>
               <select [(ngModel)]="editedItem.type">
                 <option value="expense">Expense</option>
@@ -140,9 +179,14 @@
         <tr class="daily-total-row">
           <td colspan="7">
             <span class="label">Total Income:</span>
-            <span class="daily-income-amount">₹{{ getDayTotal(date, 'income') }}</span> |
+            <span class="daily-income-amount"
+              >₹{{ getDayTotal(date, "income") }}</span
+            >
+            |
             <span class="label">Total Expense:</span>
-            <span class="daily-expense-amount">₹{{ getDayTotal(date, 'expense') }}</span>
+            <span class="daily-expense-amount"
+              >₹{{ getDayTotal(date, "expense") }}</span
+            >
           </td>
         </tr>
       </tbody>

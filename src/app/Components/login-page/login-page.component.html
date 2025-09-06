@@ -1,0 +1,64 @@
+<div class="centered-content">
+  <div class="white-box">
+    <h1 class="title has-text-primary">Login</h1>
+
+    <div class="field">
+      <p class="control has-icons-left has-icons-right">
+        <input
+          #emailInput
+          class="input has-background-light"
+          type="email"
+          placeholder="Email"
+          [ngClass]="{'is-danger': showEmailError}"
+          (focus)="onEmailFocus()"
+          (blur)="onEmailBlur(emailInput.value)"
+          (keydown.enter)="onLoginButtonClicked(emailInput.value, pwInput.value)"
+          />
+        <span class="icon is-small is-left">
+          <i class="fas fa-envelope"></i>
+        </span>
+      </p>
+      <p class="help is-danger" *ngIf="showEmailError">Email is required.</p>
+    </div>
+
+    <div class="field">
+      <p class="control has-icons-left">
+        <input
+          #pwInput
+          class="input has-background-light"
+          type="password"
+          placeholder="Password"
+          [ngClass]="{'is-danger': showPasswordError || isPasswordTooShort}"
+          (focus)="onPasswordFocus()"
+          (blur)="onPasswordBlur(pwInput.value)"
+          (keydown.enter)="onLoginButtonClicked(emailInput.value, pwInput.value)"
+        />
+        <span class="icon is-small is-left">
+          <i class="fas fa-lock"></i>
+        </span>
+      </p>
+      <p class="help is-danger" *ngIf="showPasswordError">Password is required.</p>
+      <p class="help is-danger" *ngIf="isPasswordTooShort">
+        Password must be at least 8 characters long.
+      </p>
+    </div>
+
+    <div class="field" style="display: flex; justify-content: flex-end;">
+      <p class="control">
+        <button
+          class="button is-success has-text-white"
+          [disabled]="showEmailError || showPasswordError || isPasswordTooShort"
+          (click)="onLoginButtonClicked(emailInput.value, pwInput.value)"
+        >
+          Login
+        </button>
+      </p>
+    </div>
+
+    <br />
+
+    <p class="has-text-grey">
+      Not got an account? <a routerLink="/signup">Sign up</a> now!
+    </p>
+  </div>
+</div>

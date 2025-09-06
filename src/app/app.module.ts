@@ -9,6 +9,9 @@ import { AddItemFormComponent } from './add-item-form/add-item-form.component';
 import { FormsModule } from '@angular/forms';
 import { NgChartsModule } from 'ng2-charts';
 import { HttpClientModule } from '@angular/common/http';
+import { SignupPageComponent } from './Components/signup-page/signup-page.component';
+import { LoginPageComponent } from './Components/login-page/login-page.component';
+import { LocalDateFormatPipe } from './CustomPipes/local-date-format.pipe';
 
 
 @NgModule({
@@ -16,7 +19,10 @@ import { HttpClientModule } from '@angular/common/http';
     AppComponent,
     MainPageComponent,
     HeaderComponent,
-    AddItemFormComponent
+    AddItemFormComponent,
+    SignupPageComponent,
+    LoginPageComponent,
+    LocalDateFormatPipe
   ],
   imports: [
     BrowserModule,
